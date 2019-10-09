@@ -85,7 +85,7 @@ def accuracy(predictions, ty, features, featurenames):
     for f in features:
         print("'" + featurenames[f] + "'" + " ")
         
-    print("Errors: " + str(errors) + "/" + str(len(ty)) + "= " + str(100* ((len(ty) - errors) / len(ty))) + "%")
+    print("Errors: " + str(errors) + "/" + str(len(ty)) + "= " + str(100* ((len(ty) - errors) / len(ty))) + "% Accuracy")
     return errors
     
 
@@ -144,5 +144,4 @@ def NaiveBayes(file, features, output = False):
  #   fname = input("Enter Filepath of the dataset. Must be a comma separated .txt file \n")
   #  features = [int(input("Enter feature" + str(feat))) for feat in range(int(input("Enter Number of Features \n")))]
    # NaiveBayes(fname,features)
-
-
+   

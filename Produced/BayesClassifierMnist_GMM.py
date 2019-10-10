@@ -37,7 +37,7 @@ class BayesClassifier():
     def sample_for_y(self, y):
         g = self.gaussian[y]
         sample = g.sample()
-        mean = g.mean_[sample[1]]
+        mean = g.means_[sample[1]]
         return sample[0].reshape(28,28), mean.reshape(28,28)
 
     def sample(self):

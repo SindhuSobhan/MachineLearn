@@ -16,7 +16,7 @@ class BayesClassifier():
             (n,h,w) = X.shape
             X = X.reshape(n, h * w) 
             return X, Y
-        if data == 'fasion_mnist':
+        if data == 'fashion_mnist':
             (X, Y),  (_, _) = fashion_mnist.load_data()
             (n,h,w) = X.shape
             X = X.reshape(n, h * w) 
@@ -38,7 +38,7 @@ class BayesClassifier():
         return mvn.rvs(mean = g["m"], cov = g["cov"])
 
     def sample(self):
-        y = np.random.randint(0, 10)
+        y = np.random.randint(0, self.k)
         return self.sample_for_y(y)
 
 

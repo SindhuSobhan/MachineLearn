@@ -14,12 +14,12 @@ class BayesClassifier():
         if data == 'mnist':
             (X, Y),  (_, _) = mnist.load_data()
             (n,h,w) = X.shape
-            X = X.reshape(n, h * w) 
+            X = X.reshape(n, h * w) / 255.0
             return X, Y
         if data == 'fashion_mnist':
             (X, Y),  (_, _) = fashion_mnist.load_data()
             (n,h,w) = X.shape
-            X = X.reshape(n, h * w) 
+            X = X.reshape(n, h * w) /255.0
             return X, Y
 
     def fit(self, trainx, trainy):

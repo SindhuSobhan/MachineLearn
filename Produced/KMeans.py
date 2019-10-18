@@ -91,14 +91,21 @@ class KMeans:
       
       
   def update_param(self):
-    for c in range(self.n_clusters):
-      self.centroids[c] = np.mean(data[self.cluster == c, :], axis = 0)
+    if len(np.unique(self.cluster)) < self.n_clusters:
+        print("Cluster initialisation inappropriate, Reinitialising..")
+        self.initialise_parameters(data)
+    else:
+      for c in range(self.n_clusters):
+        self.centroids[c] = np.mean(data[self.cluster == c, :], axis = 0)
           
           
           
   def stopping_criteria(self):
     return len(self.costs) > 1 and (abs(self.costs[-2] - self.costs[-1]) < self.tol)
           
+
+
+
 
 if __name__ == '__main__':
     dataset = make_blobs(n_samples = 1000, n_features =2, centers = 10)

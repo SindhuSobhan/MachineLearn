@@ -179,7 +179,7 @@ class KMeans:
       else:
         # For each cluster, update the cluster centroid
           for c in range(self.n_clusters):
-              self.centroids[c] = np.mean(data[self.cluster == c, :], axis = 0)
+              self.centroids[c, :] = np.mean(data[self.cluster == c, :], axis = 0)
           
           
 
@@ -197,14 +197,14 @@ class KMeans:
 # Main Section to run the class
 if __name__ == '__main__':
     # Create Dataset
-    dataset = make_blobs(n_samples = 10000, n_features =2, centers = 5)
+    dataset = make_blobs(n_samples = 10000, n_features =100, centers = 10)
     # Extract only the data and not the cluster indices (stored in dataset[1])
     data = dataset[0]
 
     # Create KMeans Class with 5 clusters 
-    cl = KMeans(5)
+    cl = KMeans(10)
     # Fit the created data
-    cl.fit(data, recursive = False)
+    cl.fit(data, recursive = True)
 
     # Plot the Actual and KMeans cluster side by side
     plt.figure(figsize = (10, 5))

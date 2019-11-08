@@ -23,25 +23,38 @@ class Particle(object):
 
 # Define the optimisation algorithm
 class PSO:
-    def __init__(self, MaxItr = 100, nPop = 50, VarMax = 10, VarMin = -10, Vel_damp = 0.02 ):
+    def __init__(self, MaxItr = 1000, nPop = 50, VarMax = 10, VarMin = -10, Vel_damp = 0.02, constriction = True ):
         self.MaxItr = MaxItr                            # Maximum iteration
 
-        self.nVar = 100                                # Number of unknown variables 
+        self.nVar = 100                                 # Number of unknown variables 
         self.VarMin = VarMin                            # Minimum value of Particle Position
         self.VarMax = VarMax                            # Maximum value of Particle Position
         self.VarSize = (1, self.nVar)                   # Dimension of each variable
         self.VelMax = Vel_damp * (VarMax - VarMin)      # Minimum value of Particle Velocity
         self.VelMin = - self.VelMax                     # Minimum value of Particle Velocity
 
-        self.nPop = 50                                  # Number of Paricles (Population)
-
-        self.w = 1                                      # Inertia velocity weight 
-        self.wdamp = 0.99                               # Damping ratio for inertia
-        self.c1 = 2                                     # Acceleration coefficient 1
-        self.c2 = 2                                     # Acceleration Coefficient 2
+        if constriction:
+            self.w = 1                                      # Inertia velocity weight 
+            self.wdamp = 0.90                               # Damping ratio for inertia
+            self.c1 = 2                                     # Acceleration coefficient 1
+            self.c2 = 2                                     # Acceleration Coefficient 2
+            self.nPop = 5 * self.nVar                       # Number of Paricles (Population)
+        else:
+            self.Kappa = 1                         
+            self.phi1 = 2.05
+            self.phi2 = 2.05
+            self.phi = self.phi1 + self.phi2
+            self.chi = 2 * self.Kappa / np.abs(2 - self.phi - np.sqrt(self.phi ** 2 - 4 * self.phi))
+            self.w = self.chi                                # Inertia velocity weight 
+            self.wdamp = 0.9                                 # Damping ratio for inertia
+            self.c1 = self.chi * self.phi1                   # Acceleration coefficient 1
+            self.c2 = self.chi * self.phi2                   # Acceleration Coefficient 2
+            self.nPop = 5 * self.nVar                        # Number of Paricles (Population)
 
         # Best Particle (Best particle in the particle population)
         self.globalBest = {"cost" : np.inf, "position" : None} 
+        # Best Particle parameters
+        self.BestPart = np.zeros((self.MaxItr, self.nPop, self.nVar))
 
 
     # Initialise Particles
@@ -72,6 +85,12 @@ class PSO:
     def optimise(self):
         self.initialise_particles()                     # Call functions to initialise particles 
 
+        # Form the iteration array for diaplaying cost
+        disp_arr = np.array(list(map(int, np.linspace(0, self.MaxItr, 10))))
+
+        # Iteration constant 
+        k = 0
+
         # Run for the number of specified iterations
         for i in range(self.MaxItr):
             # Run for all particles in the population
@@ -101,23 +120,51 @@ class PSO:
                     if self.particle[j].best["cost"] < self.globalBest["cost"]:
                         self.globalBest = self.particle[j].best
 
+                # Save particle best for later use / debugging (To see particle movement)
+                self.BestPart[i, j, :] = self.particle[j].best["position"]
+
             # Update Best Costs after each iteration
             self.BestCosts[i] = self.globalBest["cost"]
             # Dampen the Inertia weight
             self.w = self.w * self.wdamp
+
+            # Display 10 cost values
+            if i == disp_arr[k]:
+                print("Best_Cost at itr ", i , " : " , self.globalBest["cost"])
+                k = k + 1
+
+        # Print globally best parameters
+        print("..................")
+        print("Best Cost : ", self.globalBest["cost"], "at Best parameters : ", self.globalBest["position"], sep = '\n')
+        print("..................")
+
+
+    def plot(self):
+        # Plot the best cost values
+        plt.figure(num = 1)
+        plt.semilogy(self.BestCosts, label =  'Cost')
+        plt.title("Best Costs")
+        plt.xlabel("Iteration")
+        plt.ylabel("Cost")
+        plt.legend()
+        plt.grid() 
+
+        # Plot the particle position values
+        plt.figure(num = 2)
+        for i in np.linspace(2, particles.MaxItr, 10):
+            plt.cla()
+            print("iteration ", str(int(i)))
+            X = self.BestPart[0 : int(i), :, 0].squeeze()
+            Y = self.BestPart[0 : int(i), :, 1].squeeze()
+            plt.plot(X, Y)
+            plt.grid()
+
+        plt.show()
+            
 
 
 # Run the PSO class    
 if __name__ == '__main__':
     particles = PSO()
     particles.optimise()
-
-    # Print globally best parameters
-    print("Best parameters:", particles.globalBest)
-
-    # Plot the best cost values
-    plt.semilogy(particles.BestCosts, label =  'Cost')
-    plt.title("Best Costs")
-    plt.legend()
-    plt.grid()  
-    plt.show()
+    particles.plot()

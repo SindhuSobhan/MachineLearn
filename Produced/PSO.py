@@ -23,17 +23,20 @@ class Particle(object):
 
 # Define the optimisation algorithm
 class PSO:
-    def __init__(self, MaxItr = 1000, nPop = 50, VarMax = 10, VarMin = -10, Vel_damp = 0.02, constriction = True ):
+    def __init__(self, MaxItr = 1000, VarMax = None, VarMin = None, Vel_damp = None, constriction = False,  rem_coeff = None):
         self.MaxItr = MaxItr                            # Maximum iteration
 
         self.nVar = 100                                 # Number of unknown variables 
-        self.VarMin = VarMin                            # Minimum value of Particle Position
-        self.VarMax = VarMax                            # Maximum value of Particle Position
-        self.VarSize = (1, self.nVar)                   # Dimension of each variable
-        self.VelMax = Vel_damp * (VarMax - VarMin)      # Minimum value of Particle Velocity
-        self.VelMin = - self.VelMax                     # Minimum value of Particle Velocity
+        if VarMax != None:
+            self.VarMin = VarMin                            # Minimum value of Particle Position
+            self.VarMax = VarMax                            # Maximum value of Particle Position
+            self.VelMax = Vel_damp * (VarMax - VarMin)      # Minimum value of Particle Velocity
+            self.VelMin = - self.VelMax                     # Minimum value of Particle Velocity
 
-        if constriction:
+        self.VarSize = (1, self.nVar)                   # Dimension of each variable
+        self.rem_coeff = rem_coeff                      # Removal coefficient to remove particles to speed up convergence
+
+        if not constriction:
             self.w = 1                                      # Inertia velocity weight 
             self.wdamp = 0.90                               # Damping ratio for inertia
             self.c1 = 2                                     # Acceleration coefficient 1
@@ -46,7 +49,7 @@ class PSO:
             self.phi = self.phi1 + self.phi2
             self.chi = 2 * self.Kappa / np.abs(2 - self.phi - np.sqrt(self.phi ** 2 - 4 * self.phi))
             self.w = self.chi                                # Inertia velocity weight 
-            self.wdamp = 0.9                                 # Damping ratio for inertia
+            self.wdamp = 1                                   # Damping ratio for inertia
             self.c1 = self.chi * self.phi1                   # Acceleration coefficient 1
             self.c2 = self.chi * self.phi2                   # Acceleration Coefficient 2
             self.nPop = 5 * self.nVar                        # Number of Paricles (Population)
@@ -86,13 +89,18 @@ class PSO:
         self.initialise_particles()                     # Call functions to initialise particles 
 
         # Form the iteration array for diaplaying cost
-        disp_arr = np.array(list(map(int, np.linspace(0, self.MaxItr, 10))))
+        disp_arr = np.array(list(map(int, np.linspace(0, self.MaxItr - 1, 10))))
 
         # Iteration constant 
         k = 0
 
         # Run for the number of specified iterations
         for i in range(self.MaxItr):
+            # If removal coefficient is set
+            if self.rem_coeff:
+                if np.remainder(i, 100) == 0:
+                    self.optimise_with_removal()
+                  
             # Run for all particles in the population
             for j in range(self.nPop):
                 # Update the velocity of the jth particle
@@ -139,6 +147,19 @@ class PSO:
         print("..................")
 
 
+    def optimise_with_removal(self):
+        costs = np.zeros((self.nPop,1))
+        for itr in range(self.nPop):
+            costs[itr] = self.particle[itr].cost
+        idx = np.argsort(costs, axis = 0)
+        idx = idx[::-1]
+        idx = idx[:int(self.nPop * self.rem_coeff)]
+        self.particle[idx] = None
+        l = list(filter(None, self.particle))
+        self.particle = np.array(l)
+        self.nPop = self.particle.shape[0]
+
+
     def plot(self):
         # Plot the best cost values
         plt.figure(num = 1)
@@ -165,6 +186,6 @@ class PSO:
 
 # Run the PSO class    
 if __name__ == '__main__':
-    particles = PSO()
+    particles = PSO(MaxItr = 1000, VarMax = 10, VarMin = -10, Vel_damp = 0.02, constriction = True,  rem_coeff = 0.2)
     particles.optimise()
     particles.plot()

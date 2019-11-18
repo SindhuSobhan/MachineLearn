@@ -138,7 +138,7 @@ class PSO:
 
             # Display 10 cost values
             if i == disp_arr[k]:
-                print("Best_Cost at itr ", i , " : " , self.globalBest["cost"])
+                print("Best_Cost at itr ", i+1 , " : " , self.globalBest["cost"])
                 k = k + 1
 
         # Print globally best parameters
@@ -174,7 +174,6 @@ class PSO:
         plt.figure(num = 2)
         for i in np.linspace(2, particles.MaxItr, 10):
             plt.cla()
-            print("iteration ", str(int(i)))
             X = self.BestPart[0 : int(i), :, 0].squeeze()
             Y = self.BestPart[0 : int(i), :, 1].squeeze()
             plt.plot(X, Y)

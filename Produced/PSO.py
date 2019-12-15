@@ -88,7 +88,7 @@ class PSO:
     def optimise(self):
         self.initialise_particles()                     # Call functions to initialise particles 
 
-        # Form the iteration array for diaplaying cost
+        # Form the iteration array for displaying cost
         disp_arr = np.array(list(map(int, np.linspace(0, self.MaxItr - 1, 10))))
 
         # Iteration constant 

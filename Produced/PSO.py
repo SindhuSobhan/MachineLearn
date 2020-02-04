@@ -138,7 +138,8 @@ class PSO:
 
             # Display 10 cost values
             if i == disp_arr[k]:
-                print("Best_Cost at itr ", i+1 , " : " , self.globalBest["cost"])
+                print("Best_Cost at itr ", i+1 , " : " , self.globalBest["cost"])TASK
+                
                 k = k + 1
 
         # Print globally best parameters
